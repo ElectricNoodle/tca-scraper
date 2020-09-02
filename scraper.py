@@ -1,27 +1,28 @@
-import time, threading, pystore,urllib.request,re
+import time, threading, tstables,tables,urllib.request,re,ast,datetime
+import pandas as pd
 from bs4 import BeautifulSoup
 
-data_path = "~/pystore"
-data_store_name = "datastore"
-collection_name = "capacity_data"
 
-data_store = None
-collection = None
+class TCAData(tables.IsDescription):
+    code = tables.StringCol(64)
+    name = tables.StringCol(64)
+    capacity = tables.IntCol(pos=2)
+    count = tables.IntCol(pos=3)
+    timestamp = tables.Float64Col(pos=4)
+
+
+
+
 
 
 scrape_url = "https://portal.rockgympro.com/portal/public/d0f355e237dda999f3112d94d3c762c7/occupancy"
 SCRAPE_INTERVAL = 5
 scrape_regex = re.compile('var data = (.*?);', re.DOTALL | re.MULTILINE )
 
-def init_pystore():
+f = tables.open_file('tca.h5','a')
 
-    pystore.set_path(data_path)
-
-    # Connect to datastore (create it if not exist)
-    data_store = pystore.store(data_store_name)
-
-    # Access a collection (create it if not exist)
-    collection = data_store.collection(collection_name)
+# Create a new time series
+ts = f.create_ts('/','BPI',TCAData)
 
 def scrape_data():
 
@@ -35,18 +36,31 @@ def scrape_data():
     soup = BeautifulSoup(html, 'html.parser')
     scripts = soup.find_all('script')
    
-    data = scrape_regex.find_all(str(scripts[2].string))
+    data = scrape_regex.search(str(scripts[2].string))
     print(scripts[2])
 
     if data:
-        print(data)
+        save_data(data.group(1))
 
 
-    threading.Timer(SCRAPE_INTERVAL, main).start()
+    threading.Timer(SCRAPE_INTERVAL, scrape_data).start()
 
-def main():
+def save_data(raw_data):
+  
+    data= ast.literal_eval(raw_data)
+    time = datetime.datetime.now()
+
+    data = {'GymCode':  ['BRI', 'UNC', 'GLA', 'PST'],
+        'GymName': ['The Mothership', 'The Church', 'The Newsroom', 'The Prop Store'],
+        'Capacity': [data['BRI']['capacity'], data['UNC']['capacity'], data['GLA']['capacity'], data['PST']['capacity']],
+        'Count': [data['BRI']['count'], data['UNC']['count'], data['GLA']['count'], data['PST']['count']],
+        'Time':[time,time,time,time]
+    }
+
+    print(data)
     
-    init_pystore()
-    scrape_data()
-    
-main()
+    df = pd.DataFrame (data, columns = ['GymCode', 'GymName', 'Capacity', 'Count','Time'])
+    ts.append(df)
+    print (df)
+
+scrape_data()
