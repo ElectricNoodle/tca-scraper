@@ -53,7 +53,7 @@ def save_data(raw_data):
                     },
                     "time": time.isoformat(),
                     "fields": {
-                        "value": data[gym_code]['capacity']
+                        "value": data[gym_code]['count']
                     }
                 }
             ]

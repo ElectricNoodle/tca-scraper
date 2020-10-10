@@ -14,7 +14,6 @@ app = Flask(__name__)
 @app.route('/<gym_code>', methods=['GET'])
 def values(gym_code="all"):
     startTime = request.args.get('from')
-    
     endTime = request.args.get('to')
 
     if startTime is not None:
@@ -27,7 +26,7 @@ def values(gym_code="all"):
         try:
             endTime = datetime.strptime(endTime, "%Y-%m-%dT%H:%M:%S%z").isoformat()
         except ValueError:
-            startTime = datetime.now().isoformat()
+            endTime = datetime.now().isoformat()
 
     gym_codes = ['BRI', 'UNC', 'GLA', 'PST']
 
