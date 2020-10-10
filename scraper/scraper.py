@@ -12,7 +12,7 @@ influx_db_user = os.environ['INFLUXDB_USER']
 influx_db_user = os.environ['INFLUXDB_PASSWORD']
 
 scrape_url = "https://portal.rockgympro.com/portal/public/d0f355e237dda999f3112d94d3c762c7/occupancy"
-SCRAPE_INTERVAL = 5
+SCRAPE_INTERVAL = 300
 scrape_regex = re.compile('var data = (.*?);', re.DOTALL | re.MULTILINE)
 
 client = InfluxDBClient('influxdb', 8086, 'admin', 'admin', 'tca')

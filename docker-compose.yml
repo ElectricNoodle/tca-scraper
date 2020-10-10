@@ -1,11 +1,27 @@
 version: "3"
 
 services:
-  python:
-    build: .
+  scraper:
+    build: ./scraper
     working_dir: /usr/src/app
     volumes:
-      - .:/usr/src/app
+      - ./scraper:/usr/src/app
+    depends_on:
+      - influxdb
+      - chronograf
+    links:
+      - influxdb:influxdb
+    environment:
+      - INFLUXDB_USER=${INFLUXDB_USERNAME}
+      - INFLUXDB_PASSWORD=${INFLUXDB_PASSWORD}
+  
+  api:
+    build: ./api
+    ports:
+      - "9000:5000"
+    working_dir: /usr/src/app
+    volumes:
+      - ./api:/usr/src/app
     depends_on:
       - influxdb
       - chronograf
