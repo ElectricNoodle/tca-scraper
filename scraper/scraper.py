@@ -9,13 +9,13 @@ from influxdb import InfluxDBClient
 import os
 
 influx_db_user = os.environ['INFLUXDB_USER']
-influx_db_user = os.environ['INFLUXDB_PASSWORD']
+influx_db_pass = os.environ['INFLUXDB_PASSWORD']
 
 scrape_url = "https://portal.rockgympro.com/portal/public/d0f355e237dda999f3112d94d3c762c7/occupancy"
 SCRAPE_INTERVAL = 300
 scrape_regex = re.compile('var data = (.*?);', re.DOTALL | re.MULTILINE)
 
-client = InfluxDBClient('influxdb', 8086, 'admin', 'admin', 'tca')
+client = InfluxDBClient('influxdb', 8086, influx_db_user, influx_db_pass, 'tca')
 
 def scrape_data():
     fp = urllib.request.urlopen(scrape_url)

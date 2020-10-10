@@ -1,8 +1,12 @@
 from flask import Flask, jsonify, request
 from influxdb import InfluxDBClient
 from datetime import datetime, timedelta
+import os
 
-client = InfluxDBClient('influxdb', 8086, 'admin', 'admin', 'tca')
+influx_db_user = os.environ['INFLUXDB_USER']
+influx_db_pass = os.environ['INFLUXDB_PASSWORD']
+
+client = InfluxDBClient('influxdb', 8086, influx_db_user, influx_db_pass, 'tca')
 
 app = Flask(__name__)
 
