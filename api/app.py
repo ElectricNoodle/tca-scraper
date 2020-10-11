@@ -1,4 +1,5 @@
 from flask import Flask, jsonify, request
+from flask_cors import CORS
 from influxdb import InfluxDBClient
 from datetime import datetime, timedelta
 import os
@@ -9,6 +10,7 @@ influx_db_pass = os.environ['INFLUXDB_PASSWORD']
 client = InfluxDBClient('influxdb', 8086, influx_db_user, influx_db_pass, 'tca')
 
 app = Flask(__name__)
+CORS(app)
 
 @app.route('/', methods=['GET'])
 @app.route('/<gym_code>', methods=['GET'])
