@@ -1,0 +1,60 @@
+version: "3"
+
+services:
+  scraper:
+    build: ./scraper
+    working_dir: /usr/src/app
+    volumes:
+      - ./scraper:/usr/src/app
+    depends_on:
+      - influxdb
+      - chronograf
+    links:
+      - influxdb:influxdb
+    environment:
+      - INFLUXDB_USER=${INFLUXDB_USERNAME}
+      - INFLUXDB_PASSWORD=${INFLUXDB_PASSWORD}
+  
+  api:
+    build: ./api
+    ports:
+      - "9000:5000"
+    working_dir: /usr/src/app
+    volumes:
+      - ./api:/usr/src/app
+    depends_on:
+      - influxdb
+      - chronograf
+    links:
+      - influxdb:influxdb
+    environment:
+      - INFLUXDB_USER=${INFLUXDB_USERNAME}
+      - INFLUXDB_PASSWORD=${INFLUXDB_PASSWORD}
+
+  influxdb:
+    image: influxdb:latest
+    ports:
+      - "8086:8086"
+    volumes:
+      - influxdb-storage:/var/lib/influxdb
+    environment:
+      - INFLUXDB_DB=tca
+      - INFLUXDB_ADMIN_USER=${INFLUXDB_USERNAME}
+      - INFLUXDB_ADMIN_PASSWORD=${INFLUXDB_PASSWORD}
+
+  chronograf:
+    image: chronograf:latest
+    ports:
+      - "127.0.0.1:8888:8888"
+    volumes:
+      - chronograf-storage:/var/lib/chronograf
+    depends_on:
+      - influxdb
+    environment:
+      - INFLUXDB_URL=http://influxdb:8086
+      - INFLUXDB_USERNAME=${INFLUXDB_USERNAME}
+      - INFLUXDB_PASSWORD=${INFLUXDB_PASSWORD}
+
+volumes:
+  influxdb-storage:
+  chronograf-storage:
