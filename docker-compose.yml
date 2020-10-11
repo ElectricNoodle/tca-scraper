@@ -15,6 +15,15 @@ services:
       - INFLUXDB_USER=${INFLUXDB_USERNAME}
       - INFLUXDB_PASSWORD=${INFLUXDB_PASSWORD}
   
+  web:
+    build: ./web
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./web:/usr/src/app
+    depends_on:
+      - api
+  
   api:
     build: ./api
     ports:
