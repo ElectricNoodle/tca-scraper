@@ -11,8 +11,11 @@ import os
 influx_db_user = os.environ['INFLUXDB_USER']
 influx_db_pass = os.environ['INFLUXDB_PASSWORD']
 
-scrape_url =os.environ['SCRAPE_URL'] or "https://portal.rockgympro.com/portal/public/d0f355e237dda999f3112d94d3c762c7/occupancy"
-SCRAPE_INTERVAL = os.environ['SCRAPE_INTERVAL'] or 300
+try:
+    scrape_url = os.environ['SCRAPE_URL'] or "https://portal.rockgympro.com/portal/public/d0f355e237dda999f3112d94d3c762c7/occupancy"
+    SCRAPE_INTERVAL =  int(os.environ['SCRAPE_INTERVAL']) or 300
+except  KeyError:
+    pass
 
 scrape_regex = re.compile('var data = (.*?);', re.DOTALL | re.MULTILINE)
 

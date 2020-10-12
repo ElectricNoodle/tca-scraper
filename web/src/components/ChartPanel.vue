@@ -1,6 +1,9 @@
 <template>
-  <div>
-    <h1>{{ gymCode }}</h1>
+  <div style="margin-bottom:30px;">
+    <strong>{{ gymName }}</strong>&nbsp;-&nbsp;<em>{{ gymLocation }}</em>
+    <p>
+      Open from {{ this.getOpeningTimeText }} to {{ this.getClosingTimeText }}
+    </p>
     <Chart v-if="loaded" :gymCode="gymCode" :chart-data="graphData" />
   </div>
 </template>
@@ -15,7 +18,8 @@ import {
   today,
   startOfToday,
   endOfToday,
-  formatISO
+  formatISO,
+  addHours
 } from "date-fns";
 
 export default {
@@ -24,7 +28,12 @@ export default {
   },
   data() {
     return {
+      baseApiUrl: this.$store.state.baseApiUrl,
       loaded: false,
+      gymName: this.$store.state.gymData[this.gymCode].name,
+      gymLocation: this.$store.state.gymData[this.gymCode].location,
+      openTime: this.$store.state.gymData[this.gymCode].open,
+      closeTime: this.$store.state.gymData[this.gymCode].close,
       apiData: null,
       graphData: {
         labels: [this.gymCode],
@@ -39,7 +48,7 @@ export default {
             xAxes: [
               {
                 ticks: {},
-                type: 'string',
+                type: "string"
               }
             ]
           }
@@ -47,13 +56,27 @@ export default {
       }
     };
   },
+  computed: {
+    getOpeningDateISO: function() {
+      return formatISO(addHours(startOfToday(), this.openTime));
+    },
+    getClosingDateISO: function() {
+      return formatISO(addHours(startOfToday(), this.closeTime));
+    },
+    getOpeningTimeText: function() {
+      return format(addHours(startOfToday(), this.openTime), "p");
+    },
+    getClosingTimeText: function() {
+      return format(addHours(startOfToday(), this.closeTime), "p");
+    }
+  },
   props: ["gymCode", "backgroundColor"],
   mounted() {
     this.loaded = false;
 
     axios
-      .get("http://127.0.0.1:9000/" + this.gymCode, {
-        params: { from: formatISO(startOfToday()), to: formatISO(endOfToday()) }
+      .get(this.baseApiUrl + this.gymCode, {
+        params: { from: this.getOpeningDateISO, to: this.getClosingDateISO }
       })
       .then(response => {
         this.apiData = response.data.series[0].values;
@@ -63,11 +86,9 @@ export default {
           }
           return 0;
         });
-        this.graphData.labels = this.apiData.map(
-          apiDataValue => {
-            return apiDataValue[0];
-          }
-        );
+        this.graphData.labels = this.apiData.map(apiDataValue => {
+          return apiDataValue[0];
+        });
         this.loaded = true;
       });
   }
