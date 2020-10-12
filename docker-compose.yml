@@ -12,6 +12,7 @@ services:
     links:
       - influxdb:influxdb
     environment:
+      - SCRAPE_INTERVAL=300
       - INFLUXDB_USER=${INFLUXDB_USERNAME}
       - INFLUXDB_PASSWORD=${INFLUXDB_PASSWORD}
   
