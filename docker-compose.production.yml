@@ -1,0 +1,49 @@
+version: "3"
+
+services:
+  scraper:
+    build: ./scraper
+    working_dir: /usr/src/app
+    volumes:
+      - ./scraper:/usr/src/app
+    depends_on:
+      - influxdb
+    links:
+      - influxdb:influxdb
+    environment:
+      - SCRAPE_INTERVAL=300
+      - SCRAPE_URL=https://portal.rockgympro.com/portal/public/d0f355e237dda999f3112d94d3c762c7/occupancy
+      - INFLUXDB_USER=${INFLUXDB_USERNAME}
+      - INFLUXDB_PASSWORD=${INFLUXDB_PASSWORD}
+  web:
+    build: ./web
+    ports:
+      - "80:8080"
+    volumes:
+      - ./web:/usr/src/app
+    depends_on:
+      - api
+  
+  api:
+    build: ./api
+    ports:
+      - "9000:5000"
+    working_dir: /usr/src/app
+    volumes:
+      - ./api:/usr/src/app
+    depends_on:
+      - influxdb
+    links:
+      - influxdb:influxdb
+    environment:
+      - INFLUXDB_USER=${INFLUXDB_USERNAME}
+      - INFLUXDB_PASSWORD=${INFLUXDB_PASSWORD}
+
+  influxdb:
+    image: influxdb:latest
+    volumes:
+      - /opt:/var/lib/influxdb
+    environment:
+      - INFLUXDB_DB=tca
+      - INFLUXDB_ADMIN_USER=${INFLUXDB_USERNAME}
+      - INFLUXDB_ADMIN_PASSWORD=${INFLUXDB_PASSWORD}
