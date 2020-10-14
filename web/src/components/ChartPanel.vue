@@ -1,10 +1,15 @@
 <template>
-  <div style="margin-bottom:30px;">
-    <strong>{{ gymName }}</strong>&nbsp;-&nbsp;<em>{{ gymLocation }}</em>
-    <p>
-      Open from {{ this.getOpeningTimeText }} to {{ this.getClosingTimeText }}
-    </p>
-    <Chart v-if="loaded" :gymCode="gymCode" :chart-data="graphData" />
+  <div class="card">
+    
+    <div class="card-body">
+      <h5 class="card-title">
+        {{ gymName }} <small class="text-muted">{{ gymLocation }}</small>
+      </h5>
+      <p class="card-text">
+        Open from {{ this.getOpeningTimeText }} to {{ this.getClosingTimeText }}
+      </p>
+      <Chart v-if="loaded" :gymCode="gymCode" :chart-data="graphData" />
+    </div>
   </div>
 </template>
 
@@ -19,6 +24,7 @@ import {
   startOfToday,
   endOfToday,
   formatISO,
+  parseISO,
   addHours
 } from "date-fns";
 
@@ -42,17 +48,7 @@ export default {
             backgroundColor: this.backgroundColor,
             label: "Occupancy"
           }
-        ],
-        options: {
-          scales: {
-            xAxes: [
-              {
-                ticks: {},
-                type: "string"
-              }
-            ]
-          }
-        }
+        ]
       }
     };
   },
@@ -87,7 +83,7 @@ export default {
           return 0;
         });
         this.graphData.labels = this.apiData.map(apiDataValue => {
-          return apiDataValue[0];
+          return format(parseISO(apiDataValue[0]),'p');
         });
         this.loaded = true;
       });

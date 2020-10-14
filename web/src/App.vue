@@ -34,3 +34,9 @@ import "bootstrap-vue/dist/bootstrap-vue.css";
 })
 export default class App extends Vue {}
 </script>
+
+<style scoped>
+.row {
+  margin-top:20px;
+}
+</style>
