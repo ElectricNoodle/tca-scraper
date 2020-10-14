@@ -32,32 +32,49 @@ def scrape_data():
     scripts = soup.find_all('script')
 
     data = scrape_regex.search(str(scripts[2].string))
-    print(scripts[2])
 
     if data:
         save_data(data.group(1))
 
-    threading.Timer(SCRAPE_INTERVAL, scrape_data).start()
+    threading.Timer(15, scrape_data).start()
 
 
 def save_data(raw_data):
-
     data = ast.literal_eval(raw_data)
-    time = datetime.datetime.now()
 
     gyms = {'The Mothership':'BRI', 'The Church': 'UNC', 'The Newsroom': 'GLA', 'The Prop Store' : 'PST'};
 
     for gym in gyms.keys():
         gym_code = gyms[gym]
+
+        time = data[gym_code]['lastUpdate']
+        time = re.findall(r'\((.*?)\)', time)[0]
+        time = datetime.datetime.strptime(time, '%I:%M %p')
+        correctDateTime = datetime.datetime.combine(datetime.date.today(), time.time())
+
         json_body = [
                 {
                     "measurement": 'occupancy',
                     "tags": {
                         "gym_code": gym_code,
                     },
-                    "time": time.isoformat(),
+                    "time": correctDateTime.isoformat(),
                     "fields": {
                         "value": data[gym_code]['count']
+                    }
+                }
+            ]
+        client.write_points(json_body)
+
+        json_body = [
+                {
+                    "measurement": 'capacity',
+                    "tags": {
+                        "gym_code": gym_code,
+                    },
+                    "time": correctDateTime.isoformat(),
+                    "fields": {
+                        "value": data[gym_code]['capacity']
                     }
                 }
             ]
