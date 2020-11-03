@@ -22,9 +22,19 @@ jobs:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
 
-      # Runs a set of commands using the runners shell
       - name: Build the Vue.js Web App
         run: |
           cd $GITHUB_WORKSPACE/web
           npm install
           npm run build
+          
+      - name: Install python scraper packages
+        run: |
+          cd $GITHUB_WORKSPACE/scraper
+          pip install -r requirements.txt
+      
+      
+      - name: Install flask api packages
+        run: |
+          cd $GITHUB_WORKSPACE/api
+          pip install -r requirements.txt
