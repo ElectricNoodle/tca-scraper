@@ -47,6 +47,6 @@ jobs:
           SERVER_IP: ${{ secrets.IP_ADDRESS }}
         run: |
           mkdir .ssh
-          cat "$SSH_PRIVATE_KEY" > .ssh/id_rsa
-          cat "$SSH_PUBLIC_KEY" > .ssh/id_rsa.pub
+          echo "$SSH_PRIVATE_KEY" > .ssh/id_rsa
+          echo "$SSH_PUBLIC_KEY" > .ssh/id_rsa.pub
           ssh $SSH_USERNAME@$SERVER_IP
