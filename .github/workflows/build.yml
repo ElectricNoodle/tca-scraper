@@ -46,9 +46,10 @@ jobs:
           SSH_USERNAME: ${{ secrets.USERNAME }}
           SERVER_IP: ${{ secrets.IP_ADDRESS }}
         run: |
-          mkdir .ssh
-          echo "$SSH_PRIVATE_KEY" > .ssh/id_rsa
-          echo "$SSH_PUBLIC_KEY" > .ssh/id_rsa.pub
+          mkdir ~/.ssh
+          echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
+          echo "$SSH_PUBLIC_KEY" > ~/.ssh/id_rsa.pub
+          ssh-keyscan -t rsa $SERVER_IP >> ~/.ssh/known_hosts
           ssh $SSH_USERNAME@$SERVER_IP /bin/bash <<'EOT'
           echo "$(uname -a)"
           EOT
