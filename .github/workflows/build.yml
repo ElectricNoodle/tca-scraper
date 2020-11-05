@@ -38,3 +38,15 @@ jobs:
         run: |
           cd $GITHUB_WORKSPACE/api
           pip install -r requirements.txt
+      
+      - name: SSH into server
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }} 
+          SSH_PUBLIC_KEY: ${{ secrets.SSH_PUBLIC_KEY }} 
+          SSH_USERNAME: ${{ secrets.USERNAME }}
+          SERVER_IP: ${{ secrets.IP_ADDRESS }}
+        run: |
+          mkdir .ssh
+          cat "$SSH_PRIVATE_KEY" > .ssh/id_rsa
+          cat "$SSH_PUBLIC_KEY" > .ssh/id_rsa.pub
+          ssh $SSH_USERNAME@$SERVER_IP
