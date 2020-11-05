@@ -46,13 +46,14 @@ jobs:
           SSH_USERNAME: ${{ secrets.USERNAME }}
           SERVER_IP: ${{ secrets.IP_ADDRESS }}
         run: |
+          apt install rsync -y
           mkdir ~/.ssh
           echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
           echo "$SSH_PUBLIC_KEY" > ~/.ssh/id_rsa.pub
           chmod 644 ~/.ssh/id_rsa.pub
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan -t rsa $SERVER_IP >> ~/.ssh/known_hosts
-          scp -r $GITHUB_WORKSPACE $SSH_USERNAME@$SERVER_IP:/data/tca
+          rsync -zarvh $GITHUB_WORKSPACE $SSH_USERNAME@$SERVER_IP:/data/tca
           ssh $SSH_USERNAME@$SERVER_IP /bin/bash <<'EOT'
           echo "$(uname -a)"
           cd /data/tca
