@@ -62,6 +62,8 @@ jobs:
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan -t rsa $SERVER_IP >> ~/.ssh/known_hosts
           ssh $SSH_USERNAME@$SERVER_IP /bin/bash <<'EOT'
+          cp /home/github/.env /data/tca/web/.env
+          cp /home/github/vue.config.js /data/tca/web/vue.config.js 
           cd /data/tca
           docker-compose -f docker-compose.production.yml up -d
           EOT
