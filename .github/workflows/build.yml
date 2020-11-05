@@ -48,3 +48,20 @@ jobs:
           remote_host: ${{ secrets.IP_ADDRESS }}
           remote_user: ${{ secrets.USERNAME }}
           remote_key: ${{ secrets.SSH_PRIVATE_KEY }} 
+      - name: SSH into server
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }} 
+          SSH_PUBLIC_KEY: ${{ secrets.SSH_PUBLIC_KEY }} 
+          SSH_USERNAME: ${{ secrets.USERNAME }}
+          SERVER_IP: ${{ secrets.IP_ADDRESS }}
+        run: |
+          mkdir ~/.ssh
+          echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
+          echo "$SSH_PUBLIC_KEY" > ~/.ssh/id_rsa.pub
+          chmod 644 ~/.ssh/id_rsa.pub
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -t rsa $SERVER_IP >> ~/.ssh/known_hosts
+          ssh $SSH_USERNAME@$SERVER_IP /bin/bash <<'EOT'
+          cd /data/tca
+          docker-compose -f docker-compose.production.yml up -d
+          EOT
