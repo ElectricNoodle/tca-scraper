@@ -42,7 +42,7 @@ jobs:
       - name: Rsync to server
         uses: burnett01/rsync-deployments@4.1
         with:
-          switches: -avzr --delete
+          switches: -avzrJO --delete
           path: .
           remote_path: /data/tca
           remote_host: ${{ secrets.IP_ADDRESS }}
