@@ -38,24 +38,13 @@ jobs:
         run: |
           cd $GITHUB_WORKSPACE/api
           pip install -r requirements.txt
-      
-      - name: SSH into server
-        env:
-          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }} 
-          SSH_PUBLIC_KEY: ${{ secrets.SSH_PUBLIC_KEY }} 
-          SSH_USERNAME: ${{ secrets.USERNAME }}
-          SERVER_IP: ${{ secrets.IP_ADDRESS }}
-        run: |
-          apt install rsync -y
-          mkdir ~/.ssh
-          echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
-          echo "$SSH_PUBLIC_KEY" > ~/.ssh/id_rsa.pub
-          chmod 644 ~/.ssh/id_rsa.pub
-          chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan -t rsa $SERVER_IP >> ~/.ssh/known_hosts
-          rsync -zarvh $GITHUB_WORKSPACE $SSH_USERNAME@$SERVER_IP:/data/tca
-          ssh $SSH_USERNAME@$SERVER_IP /bin/bash <<'EOT'
-          echo "$(uname -a)"
-          cd /data/tca
-          docker-compose -f docker-compose.production.yml up -d
-          EOT
+    
+      - name: Rsync to server
+        uses: burnett01/rsync-deployments@4.1
+        with:
+          switches: -avzr --delete
+          path: .
+          remote_path: /data/tca
+          remote_host: ${{ secrets.IP_ADDRESS }}
+          remote_user: ${{ secrets.USERNAME }}
+          remote_key: ${{ secrets.SSH_PRIVATE_KEY }} 
