@@ -15,15 +15,16 @@ services:
       - SCRAPE_URL=https://portal.rockgympro.com/portal/public/d0f355e237dda999f3112d94d3c762c7/occupancy
       - INFLUXDB_USER=${INFLUXDB_USERNAME}
       - INFLUXDB_PASSWORD=${INFLUXDB_PASSWORD}
+
   web:
-    build: ./web
+    image: nginx:latest
     ports:
-      - "8088:8080"
+      - "8088:80"
     volumes:
-      - ./web:/usr/src/app
+      - ./web/dist:/usr/share/nginx/html
     depends_on:
       - api
-  
+
   api:
     build: ./api
     ports:
