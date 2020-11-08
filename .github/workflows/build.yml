@@ -26,7 +26,7 @@ jobs:
       - name: Build the Vue.js Web App
         run: |
           cd $GITHUB_WORKSPACE/web
-          echo "VUE_APP_API_URL=\"https://tca-api.proce55ing.com/\"\n" > .env
+          echo "VUE_APP_API_URL=\"https://tca-api.proce55ing.com/\"" > .env
           npm install
           npm run build
           
