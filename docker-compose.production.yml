@@ -3,6 +3,7 @@ version: "3"
 services:
   scraper:
     build: ./scraper
+    restart: always
     working_dir: /usr/src/app
     volumes:
       - ./scraper:/usr/src/app
@@ -18,6 +19,7 @@ services:
 
   web:
     image: nginx:latest
+    restart: always
     ports:
       - "8088:80"
     volumes:
@@ -27,6 +29,7 @@ services:
 
   api:
     build: ./api
+    restart: always
     ports:
       - "9000:5000"
     working_dir: /usr/src/app
