@@ -41,8 +41,8 @@ def values(gym_code="all"):
         if gym_code in gym_codes:
             whereStatement = ' AND ("gym_code"=\'' + gym_code + '\')'
 
-    results = client.query('SELECT mean("value") AS "mean_value" FROM "tca"."autogen"."occupancy" WHERE time >= \'' +
-                           startTime + '\' AND time <= \'' + endTime + '\'' + whereStatement + ' GROUP BY time(5m), "gym_code"')
+    results = client.query('SELECT distinct("value") AS "mean_value" FROM "tca"."autogen"."occupancy" WHERE time >= \'' +
+                           startTime + '\' AND time <= \'' + endTime + '\'' + whereStatement + ' GROUP BY time(15m), "gym_code"')
     return jsonify(results.raw)
 
 
