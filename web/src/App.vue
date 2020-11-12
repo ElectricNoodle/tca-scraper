@@ -1,6 +1,11 @@
 <template>
   <div id="app">
     <div class="row">
+      <div class="col-12">
+        <DatePicker />
+      </div>
+    </div>
+    <div class="row">
       <div class="col-md-6 col-sm-12 col-12">
         <ChartPanel gymCode="GLA" backgroundColor="#264653" />
       </div>
@@ -23,13 +28,15 @@
 import { BootstrapVue, IconsPlugin } from "bootstrap-vue";
 import { Component, Vue } from "vue-property-decorator";
 import ChartPanel from "./components/ChartPanel.vue";
+import DatePicker from "./components/DatePicker.vue";
 
 import "bootstrap/dist/css/bootstrap.css";
 import "bootstrap-vue/dist/bootstrap-vue.css";
 
 @Component({
   components: {
-    ChartPanel
+    ChartPanel,
+    DatePicker,
   }
 })
 export default class App extends Vue {}
@@ -37,6 +44,6 @@ export default class App extends Vue {}
 
 <style scoped>
 .row {
-  margin-top:20px;
+  margin-top: 20px;
 }
 </style>

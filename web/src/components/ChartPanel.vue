@@ -1,6 +1,5 @@
 <template>
   <div class="card">
-    
     <div class="card-body">
       <h5 class="card-title">
         {{ gymName }} <small class="text-muted">{{ gymLocation }}</small>
@@ -8,14 +7,17 @@
       <p class="card-text">
         Open from {{ this.getOpeningTimeText }} to {{ this.getClosingTimeText }}
       </p>
-      <Chart v-if="loaded" :gymCode="gymCode" :chart-data="graphData" />
+      <Chart :gymCode="gymCode" :chart-data="graphData" />
     </div>
   </div>
 </template>
 
 <script type="ts">
+import Vue from "vue";
 import Component from "vue-class-component";
 import Chart from "./Chart.vue";
+import { mapGetters } from "vuex";
+
 const axios = require("axios").default;
 import {
   format,
@@ -25,7 +27,10 @@ import {
   endOfToday,
   formatISO,
   parseISO,
-  addHours
+  addHours,
+  getDay,
+  getMonth,
+  getYear
 } from "date-fns";
 
 export default {
@@ -41,55 +46,88 @@ export default {
       openTime: this.$store.state.gymData[this.gymCode].open,
       closeTime: this.$store.state.gymData[this.gymCode].close,
       apiData: null,
+
+      options: {
+        format: "DD/MM/YYYY",
+        useCurrent: false
+      },
       graphData: {
-        labels: [this.gymCode],
-        datasets: [
-          {
-            backgroundColor: this.backgroundColor,
-            label: "Occupancy"
-          }
-        ]
+        labels: [],
+        datasets: [{}]
       }
     };
   },
   computed: {
+    getSelectedDate: function() {
+      return this.$store.getters.getDate;
+    },
     getOpeningDateISO: function() {
-      return formatISO(addHours(startOfToday(), this.openTime));
+      return formatISO(addHours(this.getSelectedDate, this.openTime));
     },
     getClosingDateISO: function() {
-      return formatISO(addHours(startOfToday(), this.closeTime));
+      return formatISO(addHours(this.getSelectedDate, this.closeTime));
     },
     getOpeningTimeText: function() {
-      return format(addHours(startOfToday(), this.openTime), "p");
+      return format(addHours(this.getSelectedDate, this.openTime), "p");
     },
     getClosingTimeText: function() {
-      return format(addHours(startOfToday(), this.closeTime), "p");
+      return format(addHours(this.getSelectedDate, this.closeTime), "p");
     }
   },
   props: ["gymCode", "backgroundColor"],
-  mounted() {
-    this.loaded = false;
+  watch: {
+    getSelectedDate: function(val) {
+      this.getData();
+    }
+  },
+  methods: {
+    getData: function() {
+      axios
+        .get(this.baseApiUrl + this.gymCode, {
+          params: { from: this.getOpeningDateISO, to: this.getClosingDateISO }
+        })
+        .then(response => {
+          if (response.data.series.length != 0) {
+            this.apiData = response.data.series[0].values;
 
-    axios
-      .get(this.baseApiUrl + this.gymCode, {
-        params: { from: this.getOpeningDateISO, to: this.getClosingDateISO }
-      })
-      .then(response => {
-        this.apiData = response.data.series[0].values;
-        this.graphData.datasets[0].data = this.apiData.map(apiDataValue => {
-          if (apiDataValue[1] !== null) {
-            return apiDataValue[1];
+            this.graphData = {
+              datasets: [
+                {
+                  backgroundColor: this.backgroundColor,
+                  label: "Occupancy",
+                  data: 
+                    this.apiData.map(apiDataValue => {
+                      if (apiDataValue[1] !== null) {
+                        return apiDataValue[1];
+                      }
+                      return 0;
+                    })
+                  
+                }
+              ],
+              labels: this.apiData.map(apiDataValue => {
+                return format(parseISO(apiDataValue[0]), "p");
+              })
+            };
+          } else {
+            this.graphData = {
+              datasets: [
+                {
+                  backgroundColor: this.backgroundColor,
+                  label: "Occupancy",
+                  data: []                  
+                }
+              ],
+              labels: []
+            };
           }
-          return 0;
         });
-        this.graphData.labels = this.apiData.map(apiDataValue => {
-          return format(parseISO(apiDataValue[0]),'p');
-        });
-        this.loaded = true;
-      });
+    }
+  },
+  mounted() {
+    this.getData();
   }
 };
 </script>
 
-<style>
-</style>
+<style></style>

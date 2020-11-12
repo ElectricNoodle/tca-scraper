@@ -2,15 +2,18 @@ import Vue from "vue";
 import App from "./App.vue";
 import Vuex from "vuex";
 
+import {
+  startOfToday,
+} from "date-fns";
+
 Vue.config.productionTip = false;
 
 Vue.use(Vuex);
 
-console.log(process.env);
-
 const store = new Vuex.Store({
   state: {
     baseApiUrl: process.env.VUE_APP_API_URL,
+    date: startOfToday(),
     gymData: {
       GLA: {
         name: "The Newsroom",
@@ -36,6 +39,16 @@ const store = new Vuex.Store({
         open: 12,
         close: 22
       }
+    }
+  },
+  getters: {
+    getDate : state => {
+      return state.date
+    }
+  },
+  mutations: {
+    SET_DATE (state, date) {
+      state.date = date
     }
   }
 });
