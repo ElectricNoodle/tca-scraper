@@ -28,7 +28,6 @@ const store = new Vuex.Store({
             close: 20
           }
         }
-
       },
       PST: {
         name: "The Prop Store",

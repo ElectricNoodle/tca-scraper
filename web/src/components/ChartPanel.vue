@@ -5,9 +5,11 @@
         {{ gymName }} <small class="text-muted">{{ gymLocation }}</small>
       </h5>
       <p class="card-text">
-        Open from {{ this.getOpeningTimeText }} to {{ this.getClosingTimeText }}
+        <font-awesome-icon icon="clock" />
+        {{ this.getOpeningTimeText }} to {{ this.getClosingTimeText }}
+        <font-awesome-icon icon="user" /> {{ this.capacity }}
       </p>
-      <Chart :gymCode="gymCode" :chart-data="graphData" />
+      <Chart :gymCode="gymCode" :capacity="capacity" :chart-data="graphData" />
     </div>
   </div>
 </template>
@@ -17,6 +19,13 @@ import Vue from "vue";
 import Component from "vue-class-component";
 import Chart from "./Chart.vue";
 import { mapGetters } from "vuex";
+
+import { library } from "@fortawesome/fontawesome-svg-core";
+import { faClock, faUser } from "@fortawesome/free-solid-svg-icons";
+library.add(faClock);
+library.add(faUser);
+
+import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 
 const axios = require("axios").default;
 import {
@@ -37,6 +46,7 @@ import {
 export default {
   components: {
     Chart,
+    FontAwesomeIcon,
   },
   data() {
     return {
@@ -45,7 +55,7 @@ export default {
       gymName: this.$store.state.gymData[this.gymCode].name,
       gymLocation: this.$store.state.gymData[this.gymCode].location,
       apiData: null,
-
+      capacity: 0,
       options: {
         format: "DD/MM/YYYY",
         useCurrent: false,
@@ -96,8 +106,9 @@ export default {
           params: { from: this.getOpeningDateISO, to: this.getClosingDateISO },
         })
         .then((response) => {
-          if (response.data.series.length != 0) {
-            this.apiData = response.data.series[0].values;
+          if (response.data.occupancy != 0) {
+            this.capacity = response.data.capacity;
+            this.apiData = response.data.occupancy;
 
             this.graphData = {
               datasets: [

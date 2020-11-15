@@ -36,14 +36,30 @@ def values(gym_code="all"):
 
     gym_codes = ['BRI', 'UNC', 'GLA', 'PST']
 
-    whereStatement = ''
-    if gym_code != 'all':
-        if gym_code in gym_codes:
-            whereStatement = ' AND ("gym_code"=\'' + gym_code + '\')'
+    if gym_code not in gym_codes:
+        return ''
 
-    results = client.query('SELECT distinct("value") AS "mean_value" FROM "tca"."autogen"."occupancy" WHERE time >= \'' +
-                           startTime + '\' AND time <= \'' + endTime + '\'' + whereStatement + ' GROUP BY time(15m), "gym_code"')
-    return jsonify(results.raw)
+    try:
+        capacity = client.query('SELECT DISTINCT("value") AS "capacity" FROM "tca"."autogen"."capacity" WHERE time >= \'' +
+                                startTime + '\' AND time <= \'' + endTime + '\' AND ("gym_code"=\'' + gym_code + '\')  GROUP BY time(24h)')
+        capacity = capacity.raw['series'][0]['values'][0][1]
+    except:
+        capacity = 0
+
+    try:
+        occupancy = client.query('SELECT DISTINCT("value") AS "occupancy" FROM "tca"."autogen"."occupancy" WHERE time >= \'' +
+                                 startTime + '\' AND time <= \'' + endTime + '\' AND ("gym_code"=\'' + gym_code + '\')  GROUP BY time(15m)')
+        occupancy = occupancy.raw['series'][0]['values']
+    except:
+        occupancy = []
+
+    returnValue = {
+        'gym_code': gym_code,
+        'capacity': capacity,
+        'occupancy': occupancy
+    }
+
+    return jsonify(returnValue)
 
 
 if __name__ == '__main__':
