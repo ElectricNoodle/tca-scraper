@@ -30,12 +30,13 @@ import {
   addHours,
   getDay,
   getMonth,
-  getYear
+  getYear,
+  isWeekend,
 } from "date-fns";
 
 export default {
   components: {
-    Chart
+    Chart,
   },
   data() {
     return {
@@ -43,50 +44,58 @@ export default {
       loaded: false,
       gymName: this.$store.state.gymData[this.gymCode].name,
       gymLocation: this.$store.state.gymData[this.gymCode].location,
-      openTime: this.$store.state.gymData[this.gymCode].open,
-      closeTime: this.$store.state.gymData[this.gymCode].close,
       apiData: null,
 
       options: {
         format: "DD/MM/YYYY",
-        useCurrent: false
+        useCurrent: false,
       },
       graphData: {
         labels: [],
-        datasets: [{}]
-      }
+        datasets: [{}],
+      },
     };
   },
   computed: {
-    getSelectedDate: function() {
+    getOpenTime: function () {
+      return isWeekend(this.getSelectedDate)
+        ? this.$store.state.gymData[this.gymCode].times.weekend.open
+        : this.$store.state.gymData[this.gymCode].times.weekday.open;
+    },
+    getCloseTime: function () {
+      return isWeekend(this.getSelectedDate)
+        ? this.$store.state.gymData[this.gymCode].times.weekend.close
+        : this.$store.state.gymData[this.gymCode].times.weekday.close;
+    },
+    getSelectedDate: function () {
       return this.$store.getters.getDate;
     },
-    getOpeningDateISO: function() {
-      return formatISO(addHours(this.getSelectedDate, this.openTime));
+    getOpeningDateISO: function () {
+      return formatISO(addHours(this.getSelectedDate, this.getOpenTime));
     },
-    getClosingDateISO: function() {
-      return formatISO(addHours(this.getSelectedDate, this.closeTime));
+    getClosingDateISO: function () {
+      return formatISO(addHours(this.getSelectedDate, this.getCloseTime));
     },
-    getOpeningTimeText: function() {
-      return format(addHours(this.getSelectedDate, this.openTime), "p");
+    getOpeningTimeText: function () {
+      return format(addHours(this.getSelectedDate, this.getOpenTime), "p");
     },
-    getClosingTimeText: function() {
-      return format(addHours(this.getSelectedDate, this.closeTime), "p");
-    }
+    getClosingTimeText: function () {
+      return format(addHours(this.getSelectedDate, this.getCloseTime), "p");
+    },
   },
   props: ["gymCode", "backgroundColor"],
   watch: {
-    getSelectedDate: function(val) {
+    getSelectedDate: function (val) {
       this.getData();
-    }
+    },
   },
   methods: {
-    getData: function() {
+    getData: function () {
       axios
         .get(this.baseApiUrl + this.gymCode, {
-          params: { from: this.getOpeningDateISO, to: this.getClosingDateISO }
+          params: { from: this.getOpeningDateISO, to: this.getClosingDateISO },
         })
-        .then(response => {
+        .then((response) => {
           if (response.data.series.length != 0) {
             this.apiData = response.data.series[0].values;
 
@@ -95,19 +104,17 @@ export default {
                 {
                   backgroundColor: this.backgroundColor,
                   label: "Occupancy",
-                  data: 
-                    this.apiData.map(apiDataValue => {
-                      if (apiDataValue[1] !== null) {
-                        return apiDataValue[1];
-                      }
-                      return 0;
-                    })
-                  
-                }
+                  data: this.apiData.map((apiDataValue) => {
+                    if (apiDataValue[1] !== null) {
+                      return apiDataValue[1];
+                    }
+                    return 0;
+                  }),
+                },
               ],
-              labels: this.apiData.map(apiDataValue => {
+              labels: this.apiData.map((apiDataValue) => {
                 return format(parseISO(apiDataValue[0]), "p");
-              })
+              }),
             };
           } else {
             this.graphData = {
@@ -115,18 +122,18 @@ export default {
                 {
                   backgroundColor: this.backgroundColor,
                   label: "Occupancy",
-                  data: []                  
-                }
+                  data: [],
+                },
               ],
-              labels: []
+              labels: [],
             };
           }
         });
-    }
+    },
   },
   mounted() {
     this.getData();
-  }
+  },
 };
 </script>
 

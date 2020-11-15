@@ -18,36 +18,69 @@ const store = new Vuex.Store({
       GLA: {
         name: "The Newsroom",
         location: "Glasgow",
-        open: 7,
-        close: 22
+        times: {
+          weekday: {
+            open: 7,
+            close: 22
+          },
+          weekend: {
+            open: 8,
+            close: 20
+          }
+        }
+
       },
       PST: {
         name: "The Prop Store",
         location: "Glasgow",
-        open: 12,
-        close: 22
+        times: {
+          weekday: {
+            open: 12,
+            close: 22
+          },
+          weekend: {
+            open: 9,
+            close: 20
+          }
+        }
       },
       BRI: {
         name: "The Mothership",
         location: "Bristol",
-        open: 7,
-        close: 22
+        times: {
+          weekday: {
+            open: 7,
+            close: 22
+          },
+          weekend: {
+            open: 8,
+            close: 20
+          }
+        }
       },
       UNC: {
         name: "The Church",
         location: "Bristol",
-        open: 12,
-        close: 22
+        times: {
+          weekday: {
+            open: 12,
+            close: 22
+          },
+          weekend: {
+            open: 9,
+            close: 20
+          }
+        }
       }
     }
   },
   getters: {
-    getDate : state => {
+    getDate: state => {
       return state.date
     }
   },
   mutations: {
-    SET_DATE (state, date) {
+    SET_DATE(state, date) {
       state.date = date
     }
   }
