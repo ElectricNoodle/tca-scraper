@@ -9,7 +9,13 @@
         {{ this.getOpeningTimeText }} to {{ this.getClosingTimeText }}
         <font-awesome-icon icon="user" /> {{ this.capacity }}
       </p>
-      <Chart :gymCode="gymCode" :capacity="capacity" :chart-data="graphData" />
+      <Chart
+        v-if="loaded"
+        :gymCode="gymCode"
+        :capacity="capacity"
+        :chart-data="graphData"
+        :options="chartOptions"
+      />
     </div>
   </div>
 </template>
@@ -67,6 +73,41 @@ export default {
     };
   },
   computed: {
+    chartOptions: function () {
+      return {
+        scales: {
+          yAxes: [
+            {
+              ticks: {
+                suggestedMax: this.capacity + 5,
+              },
+            },
+          ],
+        },
+        annotation: {
+          drawTime: "beforeDatasetsDraw",
+          annotations: [
+            {
+              display: true,
+              type: "line",
+              mode: "horizontal",
+              scaleID: "y-axis-0",
+              borderColor: "#e63946",
+              value: this.capacity,
+              borderDash: [4, 4],
+              label: {
+                content: this.capacity,
+                enabled: true,
+                position: "top",
+                xAdjust: 15,
+                backgroundColor: "#e63946",
+                fontSize: 12,
+              },
+            },
+          ],
+        },
+      };
+    },
     getOpenTime: function () {
       return isWeekend(this.getSelectedDate)
         ? this.$store.state.gymData[this.gymCode].times.weekend.open
@@ -139,6 +180,8 @@ export default {
               labels: [],
             };
           }
+
+          this.loaded = true;
         });
     },
   },
