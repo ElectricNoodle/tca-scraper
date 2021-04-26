@@ -34,7 +34,7 @@ const store = new Vuex.Store({
         location: "Glasgow",
         times: {
           weekday: {
-            open: 12,
+            open: 10,
             close: 22
           },
           weekend: {
